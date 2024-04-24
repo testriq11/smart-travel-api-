@@ -62,20 +62,15 @@
 
 const express = require('express');
 const mysql = require('mysql');
-const cors= require('cors');
-const os = require('os');
-const app = express();
-const ngrok = require('ngrok');
+const router = express.Router();
 
-app.use (cors());
-const port = 3002;
-app.use(express.json());
+
 // Create MySQL connection
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'nodejs_auth'
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'nodejs_auth'
 });
 
 // Connect to MySQL
@@ -86,26 +81,6 @@ connection.connect((err) => {
   }
   console.log('Connected to MySQL as id ' + connection.threadId);
 });
-
-// Middleware to parse JSON bodies
-
-app.get('/getIPAddress', (req, res) => {
-  // Retrieve the IP address of the server
-  const ipAddress = getIPAddress();
-  res.send(ipAddress);
-});
-
-function getIPAddress() {
-  const interfaces = os.networkInterfaces();
-  for (const key in interfaces) {
-      for (const interface of interfaces[key]) {
-          if (!interface.internal && interface.family === 'IPv4') {
-              return interface.address;
-          }
-      }
-  }
-  return '127.0.0.1'; // Default to localhost if no IP address is found
-}
 
 
 
@@ -126,20 +101,40 @@ function getIPAddress() {
 //   });
 // });
 
-// API endpoint to receive data from Flutter app
-app.post('/saveResponses', (req, res) => {
-  const { response_text } = req.body; // Change here
+// API endpoint to receive data from Flutter app 24/4/2024
+// app.post('/saveResponses', (req, res) => {
+//   const { response_text } = req.body;
 
-  // Insert responses into MySQL database
-  const query = 'INSERT INTO destination_openai_response (response_text) VALUES (?)';
+//   // Insert responses into MySQL database
+//   const query = 'INSERT INTO destination_openai_response (response_text) VALUES ?'; // Changed query
 
-  const values = response_text.map(response => [response]);
+//   const values = [response_text]; // Removed map function
 
-  connection.query(query, [values], (err, result) => {
-    if (err) return res.json(err);
-    return res.json(result);
+//   connection.query(query, [values], (err, result) => { // Removed map function
+//     if (err) return res.json(err);
+//     return res.json(result);
+//   });
+// });
+
+
+module.exports = (ngrokUrl) => {
+  router.post('/saveResponses', (req, res) => {
+    const { response_text } = req.body;
+
+    // Insert responses into MySQL database
+    const query = 'INSERT INTO destination_openai_response (response_text) VALUES (?)'; // Use placeholders for values
+
+    const values = [response_text];
+
+    connection.query(query, [values], (err, result) => {
+      if (err) return res.json(err);
+      return res.json(result);
+    });
   });
-});
+
+  return router;
+};
+
 
 
 
@@ -155,17 +150,17 @@ app.post('/saveResponses', (req, res) => {
 //   });
 // });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-  console.log(`Server is running on port http://localhost:${port}`);
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+//   console.log(`Server is running on port http://localhost:${port}`);
 
-  ngrok.connect(port).then(ngrokUrl=>{
-    console.log(`Ngrok Tunnle in: ${ngrokUrl}`);
-  }
-).catch(error=>{
-    console.log(`Couldnt tunnle ngrok:${error}`);
-})
-});
+//   ngrok.connect(port).then(ngrokUrl=>{
+//     console.log(`Ngrok Tunnle in: ${ngrokUrl}`);
+//   }
+// ).catch(error=>{
+//     console.log(`Couldnt tunnle ngrok:${error}`);
+// })
+// });
 // Import necessary modules
 // Import necessary modules
 // Import necessary modules
