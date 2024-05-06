@@ -30,9 +30,11 @@ ngrok.connect(port1).then(url => {
 const desOpenAiResponseRouter = require('./routes/des_open_ai_response');
 const fetchRouteRouter = require('./routes/fetch_route');
 const insertTitleRouteRouter = require('./routes/destination_title')(ngrokUrl);
-
+const loginRouter = require('./routes/login')(ngrokUrl);
 
 app.use('/des_open_ai_response', desOpenAiResponseRouter(ngrokUrl));
 app.use('/fetch_route', fetchRouteRouter(ngrokUrl));
 app.use('/destination_title', insertTitleRouteRouter);
+app.use('/login', loginRouter); // Add this line
+
 module.exports = app;
