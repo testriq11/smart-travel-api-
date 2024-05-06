@@ -116,25 +116,46 @@ connection.connect((err) => {
 //   });
 // });
 
+//26/4/2024
+// module.exports = (ngrokUrl) => {
+//   router.post('/saveResponses', (req, res) => {
+//     const { response_text } = req.body;
+
+//     // Insert responses into MySQL database
+//     const query = 'INSERT INTO destination_openai_response (response_text) VALUES (?)'; // Use placeholders for values
+
+//     const values = [response_text];
+
+//     connection.query(query, [values], (err, result) => {
+//       if (err) return res.json(err);
+//       return res.json(result);
+//     });
+//   });
+
+//   return router;
+// };
+
 
 module.exports = (ngrokUrl) => {
   router.post('/saveResponses', (req, res) => {
-    const { response_text } = req.body;
+    const { response_text, title_id } = req.body;
 
     // Insert responses into MySQL database
-    const query = 'INSERT INTO destination_openai_response (response_text) VALUES (?)'; // Use placeholders for values
+    const query = 'INSERT INTO destination_openai_response (response_text, title_id) VALUES (?, ?)'; // Use placeholders for values
 
-    const values = [response_text];
+    const values = [response_text, title_id];
 
-    connection.query(query, [values], (err, result) => {
-      if (err) return res.json(err);
+    connection.query(query, values, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message }); // Send error as JSON
+      }
       return res.json(result);
     });
   });
 
   return router;
 };
-
 
 
 
