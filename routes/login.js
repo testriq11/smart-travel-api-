@@ -45,9 +45,8 @@ connection.connect((err) => {
 
 
 
+const bcrypt = require('bcrypt');
 
-
-// const jwt = require('jsonwebtoken');
 
 module.exports = (db) => {
   const router = express.Router();
@@ -55,8 +54,8 @@ module.exports = (db) => {
   router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    const sql = "SELECT * FROM users WHERE `email` = ? AND `password` = ?";
-    connection.query(sql, [email, password], (err, result) => {
+    const sql = "SELECT * FROM users WHERE `email` = ?";
+    connection.query(sql, [email], (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -64,8 +63,19 @@ module.exports = (db) => {
 
       if (result.length > 0) {
         const user = result[0];
-        const token = jwt.sign({ id: user.id }, "jwtSecretKey", { expiresIn: 300 });
-        return res.json({ success: true, message: 'Login successful', token, user });
+        bcrypt.compare(password, user.password, (err, isValid) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to compare passwords' });
+          }
+
+          if (isValid) {
+            const token = jwt.sign({ id: user.id }, "jwtSecretKey", { expiresIn: 300 });
+            return res.json({ success: true, message: 'Login successful', token, user });
+          } else {
+            return res.status(401).json({ success: false, error: 'Invalid email or password' });
+          }
+        });
       } else {
         return res.status(401).json({ success: false, error: 'Invalid email or password' });
       }
@@ -74,3 +84,33 @@ module.exports = (db) => {
 
   return router;
 };
+
+
+
+// const jwt = require('jsonwebtoken');
+
+// module.exports = (db) => {
+//   const router = express.Router();
+
+//   router.post('/login', (req, res) => {
+//     const { email, password } = req.body;
+
+//     const sql = "SELECT * FROM users WHERE `email` = ? AND `password` = ?";
+//     connection.query(sql, [email, password], (err, result) => {
+//       if (err) {
+//         console.error(err);
+//         return res.status(500).json({ error: 'Internal server error' });
+//       }
+
+//       if (result.length > 0) {
+//         const user = result[0];
+//         const token = jwt.sign({ id: user.id }, "jwtSecretKey", { expiresIn: 300 });
+//         return res.json({ success: true, message: 'Login successful', token, user });
+//       } else {
+//         return res.status(401).json({ success: false, error: 'Invalid email or password' });
+//       }
+//     });
+//   });
+
+//   return router;
+// };
