@@ -27,13 +27,14 @@ ngrok.connect(port1).then(url => {
 });
 
 // Routes
+const bookingHistoryRouter = require('./routes/booking_history');
 const desOpenAiResponseRouter = require('./routes/des_open_ai_response');
 const fetchRouteRouter = require('./routes/fetch_route');
 const insertTitleRouteRouter = require('./routes/destination_title')(ngrokUrl);
 const loginRouter = require('./routes/login')(ngrokUrl);
 const signupRouter = require('./routes/signup');
 
-
+app.use('/booking_history', bookingHistoryRouter(ngrokUrl));
 app.use('/des_open_ai_response', desOpenAiResponseRouter(ngrokUrl));
 app.use('/fetch_route', fetchRouteRouter(ngrokUrl));
 app.use('/destination_title', insertTitleRouteRouter);

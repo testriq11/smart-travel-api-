@@ -139,12 +139,16 @@ connection.connect((err) => {
 
 module.exports = (ngrokUrl) => {
   router.post('/saveResponses', (req, res) => {
-    const { response_text, title_id } = req.body;
+    const { response_text, title_id, user_id } = req.body;
+
+    // Check for null values and handle accordingly
+    if (!user_id) {
+      return res.status(400).json({ error: 'user_id is required' });
+    }
 
     // Insert responses into MySQL database
-    const query = 'INSERT INTO destination_openai_response (response_text, title_id) VALUES (?, ?)'; // Use placeholders for values
-
-    const values = [response_text, title_id];
+    const query = 'INSERT INTO destination_openai_response (response_text, title_id, user_id) VALUES (?, ?, ?)'; // Use placeholders for values
+    const values = [response_text, title_id, user_id];
 
     connection.query(query, values, (err, result) => {
       if (err) {
@@ -157,7 +161,6 @@ module.exports = (ngrokUrl) => {
 
   return router;
 };
-
 
 
 
