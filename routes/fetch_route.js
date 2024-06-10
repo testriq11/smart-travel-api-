@@ -100,6 +100,7 @@ module.exports = (ngrokUrl) => {
     const getLastInsertedTitleIdQuery = 'SELECT title_id FROM destination_openai_response ORDER BY id DESC LIMIT 1';
     connection.query(getLastInsertedTitleIdQuery, (err, titleResults) => {
       if (err) {
+        
         console.error('Error fetching last inserted title_id:', err);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
