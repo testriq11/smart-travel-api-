@@ -38,11 +38,14 @@ const profile_fetchRouter = require('./routes/profile_fetch')(ngrokUrl);
 // const profile_updateRouter = require('./routes/profile_update');
 const profile_updateRouter = require('./routes/profile_update');
 
+const google_loginRouter = require('./routes/google_login')(ngrokUrl);
+
 app.use('/booking_history', bookingHistoryRouter(ngrokUrl));
 app.use('/des_open_ai_response', desOpenAiResponseRouter(ngrokUrl));
 app.use('/fetch_route', fetchRouteRouter(ngrokUrl));
 app.use('/destination_title', insertTitleRouteRouter);
 app.use('/login', loginRouter); // Add this line
+app.use('/google_login', google_loginRouter);
 app.use('/signup', signupRouter(ngrokUrl));
 app.use('/profile_fetch',profile_fetchRouter);
 app.use('/profile_update', profile_updateRouter);

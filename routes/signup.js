@@ -22,23 +22,67 @@ connection.connect((err) => {
 
 
 
+// module.exports = () => {
+//     router.post('/signup', (req, res) => {
+//       const { username, email, password } = req.body;
+  
+//       if (!username || !email || !password) {
+//         return res.status(400).json({ error: 'Username, email, and password are required' });
+//       }
+  
+//       bcrypt.hash(password, 10, (err, hashedPassword) => {
+//         if (err) {
+//           console.error(err);
+//           return res.status(500).json({ error: 'Failed to hash the password' });
+//         }
+  
+//         const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+//         const values = [username, email, hashedPassword];
+  
+//         connection.query(sql, values, (err, result) => {
+//           if (err) {
+//             console.error(err);
+//             return res.status(500).json({ error: 'Failed to insert data into database' });
+//           }
+//           res.status(200).json({ message: 'User registered successfully' });
+//         });
+//       });
+//     });
+  
+//     return router;
+//   };
+
+
 module.exports = () => {
-    router.post('/signup', (req, res) => {
-      const { username, email, password } = req.body;
-  
-      if (!username || !email || !password) {
-        return res.status(400).json({ error: 'Username, email, and password are required' });
+  router.post('/signup', (req, res) => {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Username, email, and password are required' });
+    }
+
+    // Check if user already exists
+    connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Failed to query database' });
       }
-  
+
+      if (results.length > 0) {
+        // User already exists
+        return res.status(200).json({ error: 'User already registered' });
+      }
+
+      // User does not exist, proceed with registration
       bcrypt.hash(password, 10, (err, hashedPassword) => {
         if (err) {
           console.error(err);
           return res.status(500).json({ error: 'Failed to hash the password' });
         }
-  
+
         const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
         const values = [username, email, hashedPassword];
-  
+
         connection.query(sql, values, (err, result) => {
           if (err) {
             console.error(err);
@@ -48,6 +92,7 @@ module.exports = () => {
         });
       });
     });
-  
-    return router;
-  };
+  });
+
+  return router;
+};
